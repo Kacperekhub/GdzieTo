@@ -1,5 +1,3 @@
-let warstwaKrakow = L.layerGroup().addTo(map);
-
 async function pobierzKrakow() {
     const urlKrakow = 'https://www.ttss.krakow.pl/internetservice/geoserviceDispatcher/services/vehicleinfo/vehicles';
     // Zmieniamy na inne proxy: cors-anywhere (przez bridge) lub corsproxy.io
