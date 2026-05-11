@@ -5,6 +5,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { a
 // Grupy warstw, żeby inne pliki mogły do nich wrzucać dane
 let warstwaSamolotow = L.layerGroup().addTo(map);
 let warstwaAutobusow = L.layerGroup().addTo(map);
+let warstwaKrakow = L.layerGroup().addTo(map);
 
 // Obsługa menu (też tu pasuje)
 document.querySelectorAll('.filter-btn').forEach(btn => {
