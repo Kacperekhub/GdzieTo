@@ -1,4 +1,5 @@
 async function pobierzSamoloty() {
+    // Używamy AllOrigins, aby ominąć blokady CORS na GitHubie
     const staryUrl = 'https://opensky-network.org/api/states/all?lamin=49.0&lomin=14.1&lamax=54.9&lomax=24.1';
     const url = `https://api.allorigins.win/get?url=${encodeURIComponent(staryUrl)}`;
 
@@ -6,10 +7,10 @@ async function pobierzSamoloty() {
         const odpowiedz = await fetch(url);
         const interfejsProxy = await odpowiedz.json();
 
-        // TARCZA ANTYKRYZYSOWA
-        if (typeof interfejsProxy.contents !== 'string' || interfejsProxy.contents.startsWith('Too many')) {
-            console.warn("Serwer OpenSky odpoczywa... Czekam na kolejną próbę za minutę.");
-            return; 
+        // Tarcza bezpieczeństwa: jeśli serwer wyśle tekst zamiast danych
+        if (!interfejsProxy.contents || interfejsProxy.contents.startsWith('Too many')) {
+            console.warn("Samoloty: Serwer przeciążony, spróbuję za chwilę.");
+            return;
         }
 
         const dane = JSON.parse(interfejsProxy.contents);
@@ -39,12 +40,14 @@ async function pobierzSamoloty() {
                         .bindPopup(`<b>Lot: ${callsign}</b><br>Kurs: ${kurs}°`);
                 }
             });
+            console.log("Samoloty zaktualizowane!");
         }
     } catch (blad) {
-        console.error("Błąd krytyczny w planes.js:", blad);
+        console.error("Błąd w planes.js:", blad);
     }
 }
 
-// Uruchomienie i interwał (60 sekund, żeby serwer nas nie blokował)
+// Start
 pobierzSamoloty();
+// Odświeżamy co 60 sekund (ważne dla stabilności na GitHubie)
 setInterval(pobierzSamoloty, 60000);
