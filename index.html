@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GdzieTo?</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Biblioteka do mapy (Leaflet) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <!-- Tu będzie mapa -->
+    <div id="map"></div>
+
+    <!-- Pływające Menu -->
+    <nav class="main-menu">
+        <h1>GdzieTo?</h1>
+        <div class="filters">
+            <button class="filter-btn active" data-type="air">Lotnictwo</button>
+            <button class="filter-btn" data-type="rail">Kolej</button>
+            <button class="filter-btn" data-type="city">MPK</button>
+        </div>
+    </nav>
+
+    <!-- Karta szczegółów (ukryta na start) -->
+    <div id="details-card" class="details-card">
+        <button onclick="closeDetails()">×</button>
+        <div id="details-content">
+            <!-- Tu JS wstrzyknie dane -->
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="js/map-base.js"></script> 
+<script src="js/planes.js"></script>
+<script src="js/krakow.js"></script>
+</body>
+</html>
