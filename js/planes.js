@@ -1,5 +1,3 @@
-let warstwaSamolotow = L.layerGroup().addTo(map);
-
 async function pobierzSamoloty() {
     const apiSamoloty = 'https://opensky-network.org/api/states/all?lamin=49.0&lomin=14.1&lamax=54.9&lomax=24.1';
     const url = `https://corsproxy.io/?${encodeURIComponent(apiSamoloty)}`;
