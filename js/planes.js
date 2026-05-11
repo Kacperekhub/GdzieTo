@@ -1,43 +1,45 @@
 async function pobierzSamoloty() {
-    const apiSamoloty = 'https://opensky-network.org/api/states/all?lamin=49.0&lomin=14.1&lamax=54.9&lomax=24.1';
-    const url = `https://corsproxy.io/?${encodeURIComponent(apiSamoloty)}`;
+    // VATSIM zazwyczaj nie wymaga proxy, ale AllOrigins pomoże nam ominąć CORS na GitHubie
+    const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://data.vatsim.net/v3/vatsim-data.json');
 
     try {
-        console.log("Pobieram dane o lotach...");
+        console.log("Próba pobrania danych VATSIM...");
         const odpowiedz = await fetch(url);
-        const tekst = await odpowiedz.text();
+        const json = await odpowiedz.json();
+        const dane = JSON.parse(json.contents);
 
-        if (tekst.trim().startsWith("<")) {
-            console.warn("Samoloty: Proxy zwróciło HTML zamiast danych.");
-            return;
-        }
-
-        const dane = JSON.parse(tekst);
-        if (dane && dane.states) {
+        if (dane && dane.pilots) {
             warstwaSamolotow.clearLayers();
-            dane.states.forEach(samolot => {
-                const lat = samolot[6];
-                const lon = samolot[5];
-                const kurs = samolot[10] || 0;
-                const lot = samolot[1]?.trim() || "???";
+            
+            // Filtrujemy samoloty, które są w okolicach Polski
+            const polskieLoty = dane.pilots.filter(p => 
+                p.latitude > 49 && p.latitude < 55 && 
+                p.longitude > 14 && p.longitude < 24
+            );
 
-                if (lat && lon) {
-                    L.marker([lat, lon], {
-                        icon: L.divIcon({
-                            className: 'plane-icon',
-                            html: `<div style="transform: rotate(${kurs}deg)"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M21,16L21,14L13,9L13,3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5L10,9L2,14L2,16L10,13.5L10,18L8,19.5L8,21L11.5,20L15,21L15,19.5L13,18L13,13.5L21,16Z" fill="#ffce00"/></svg></div>`,
-                            iconSize: [20, 20],
-                            iconAnchor: [10, 10]
-                        })
-                    }).addTo(warstwaSamolotow).bindPopup(`Lot: ${lot}`);
-                }
+            polskieLoty.forEach(samolot => {
+                const ikonaVATSIM = L.divIcon({
+                    className: 'plane-icon',
+                    html: `<div style="transform: rotate(${samolot.heading || 0}deg)">
+                            <svg width="25" height="25" viewBox="0 0 24 24">
+                                <path d="M21,16L21,14L13,9L13,3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5L10,9L2,14L2,16L10,13.5L10,18L8,19.5L8,21L11.5,20L15,21L15,19.5L13,18L13,13.5L21,16Z" fill="#00ff00"/>
+                            </svg>
+                           </div>`,
+                    iconSize: [25, 25],
+                    iconAnchor: [12, 12]
+                });
+
+                L.marker([samolot.latitude, samolot.longitude], { icon: ikonaVATSIM })
+                    .addTo(warstwaSamolotow)
+                    .bindPopup(`<b>VATSIM: ${samolot.callsign}</b><br>Model: ${samolot.flight_plan?.aircraft || 'Nieznany'}`);
             });
-            console.log("Samoloty zaktualizowane!");
+            
+            console.log(`Sukces! Znaleziono ${polskieLoty.length} lotów VATSIM.`);
         }
     } catch (e) {
-        console.warn("Samoloty: Brak dostępu do danych (CORS/Proxy).");
+        console.error("Błąd VATSIM:", e);
     }
 }
 
 pobierzSamoloty();
-setInterval(pobierzSamoloty, 60000);
+setInterval(pobierzSamoloty, 45000); // Odświeżanie co 45 sekund
